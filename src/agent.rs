@@ -41,7 +41,9 @@ impl Decoder for MessageCodec {
         }
 
         //use std::io::Write;
-        //let mut file = std::fs::File::create(uuid::Uuid::new_v4().to_string())?;
+        //let name = uuid::Uuid::new_v4().to_string();
+        //eprintln!("Capturing request into {name}");
+        //let mut file = std::fs::File::create(&name)?;
         //file.write_all(bytes)?;
         //drop(file);
 

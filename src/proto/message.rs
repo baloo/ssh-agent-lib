@@ -100,9 +100,12 @@ impl Decode for AddIdentity {
     type Error = Error;
 
     fn decode(reader: &mut impl Reader) -> Result<Self> {
+        eprintln!("before add identity decode");
         let privkey = KeypairData::decode(reader)?;
+        eprintln!("after add identity decode: {privkey:?}");
         let comment = String::decode(reader)?;
 
+        eprintln!("after comment {comment:?}");
         Ok(Self { privkey, comment })
     }
 }
@@ -129,10 +132,14 @@ impl Decode for AddIdentityConstrained {
     type Error = Error;
 
     fn decode(reader: &mut impl Reader) -> Result<Self> {
+        eprintln!("XX");
+
         let identity = AddIdentity::decode(reader)?;
+        eprintln!("found identity: {identity:?}");
         let mut constraints = vec![];
 
         while !reader.is_finished() {
+            eprintln!("constraint");
             constraints.push(KeyConstraint::decode(reader)?);
         }
 

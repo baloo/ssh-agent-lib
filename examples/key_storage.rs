@@ -7,7 +7,7 @@ use ssh_agent_lib::proto::extension::SessionBind;
 use tokio::net::UnixListener;
 
 use ssh_agent_lib::agent::{Agent, Session};
-use ssh_agent_lib::proto::message::{self, Message, SignRequest};
+use ssh_agent_lib::proto::message::{self, Credential, Message, SignRequest};
 use ssh_agent_lib::proto::{signature, AddIdentityConstrained, KeyConstraint};
 use ssh_key::{
     private::{KeypairData, PrivateKey},
@@ -128,12 +128,14 @@ impl KeyStorage {
                 Ok(Message::Success)
             }
             Message::AddIdentity(identity) => {
-                let privkey = PrivateKey::try_from(identity.privkey).unwrap();
-                self.identity_add(Identity {
-                    pubkey: PublicKey::from(&privkey),
-                    privkey,
-                    comment: identity.comment,
-                });
+                if let Credential::Key { privkey, comment } = identity.credential {
+                    let privkey = PrivateKey::try_from(privkey).unwrap();
+                    self.identity_add(Identity {
+                        pubkey: PublicKey::from(&privkey),
+                        privkey,
+                        comment: comment,
+                    });
+                }
                 Ok(Message::Success)
             }
             Message::AddIdConstrained(AddIdentityConstrained {
@@ -150,12 +152,14 @@ impl KeyStorage {
                         }
                     }
                 }
-                let privkey = PrivateKey::try_from(identity.privkey).unwrap();
-                self.identity_add(Identity {
-                    pubkey: PublicKey::from(&privkey),
-                    privkey,
-                    comment: identity.comment,
-                });
+                if let Credential::Key { privkey, comment } = identity.credential {
+                    let privkey = PrivateKey::try_from(privkey).unwrap();
+                    self.identity_add(Identity {
+                        pubkey: PublicKey::from(&privkey),
+                        privkey,
+                        comment: comment,
+                    });
+                }
                 Ok(Message::Success)
             }
             Message::SignRequest(request) => {

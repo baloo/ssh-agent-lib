@@ -2,12 +2,14 @@
 
 use core::fmt;
 
-use ssh_encoding::{Decode, Encode, Reader, Writer};
+use ssh_encoding::{
+    bigint::{Choice, CtEq},
+    Decode, Encode, Reader, Writer,
+};
 use ssh_key::{
     private::{self, DsaPrivateKey, Ed25519Keypair, RsaPrivateKey},
     Algorithm, EcdsaCurve, Error, Result,
 };
-use subtle::{Choice, ConstantTimeEq};
 
 /// Elliptic Curve Digital Signature Algorithm (ECDSA) private/public key pair.
 #[derive(Clone, Debug)]
@@ -22,7 +24,7 @@ pub enum EcdsaPrivateKey {
     NistP521(private::EcdsaPrivateKey<66>),
 }
 
-impl ConstantTimeEq for EcdsaPrivateKey {
+impl CtEq for EcdsaPrivateKey {
     fn ct_eq(&self, other: &Self) -> Choice {
         let private_key_a = match self {
             Self::NistP256(private) => private.as_slice(),
@@ -150,7 +152,7 @@ impl Encode for PrivateKeyData {
     }
 }
 
-impl ConstantTimeEq for PrivateKeyData {
+impl CtEq for PrivateKeyData {
     fn ct_eq(&self, other: &Self) -> Choice {
         // Note: constant-time with respect to key *data* comparisons, not algorithms
         match (self, other) {
